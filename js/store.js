@@ -65,7 +65,29 @@
 		callback = callback || function () {};
 		callback.call(this, JSON.parse(localStorage[this._dbName]).todos);
 	};
+  /*
+  * It will generate an ID and check if the id already exists.
+  * if there is duplication, the method will run again
+  */
+ Store.prototype.generateId = function(todos){
+    // Generate an ID
+    var newId = ""; 
 
+      for (var i = 0; i < 10; i++) {
+        newId += Math.floor(Math.random() * 10);
+      }
+      // parsed into number
+      newId = parseInt(newId);
+      // Check if already exists
+      for (var i = 0; i < todos.length; i++) {
+        if (todos[i].id === newId){
+          // If ID already exists, the function gets called again
+          newId = this.generateId(todos)
+        }
+      }
+
+    return newId;
+ }
 	/**
 	 * Will save the given data to the DB. If no item exists it will create a new
 	 * item, otherwise it'll simply update an existing item's properties
@@ -77,16 +99,7 @@
 	Store.prototype.save = function (updateData, callback, id) {
 		var data = JSON.parse(localStorage[this._dbName]);
 		var todos = data.todos;
-
 		callback = callback || function () {};
-
-		// Generate an ID
-	    var newId = ""; 
-	    var charset = "0123456789";
-
-        for (var i = 0; i < 10; i++) {
-     		newId += Math.floor(Math.random() * charset.length);
-		}
 
 		// If an ID was actually given, find the item and update each property
 		if (id) {
@@ -104,7 +117,7 @@
 		} else {
 
     		// Assign an ID
-			updateData.id = parseInt(newId);
+			updateData.id = this.generateId(todos);
     
 
 			todos.push(updateData);
